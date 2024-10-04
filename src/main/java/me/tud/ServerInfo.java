@@ -48,17 +48,17 @@ public record ServerInfo(String name, PaperAPI.Version version, Addon skript, Se
                 break config;
             }
             File skriptFolder = new File(pluginsFolder, "Skript");
-            if (!skriptFolder.exists() || !skriptFolder.mkdir()) {
+            if (!skriptFolder.exists() && !skriptFolder.mkdir()) {
                 reader.printAbove(WARN + "Failed to create Skript folder!" + RESET);
                 break config;
             }
             File configFile = new File(skriptFolder, "config.sk");
-            try (InputStream input = jarFile.getInputStream(jarEntry); FileOutputStream output = new FileOutputStream(configFile)) {
+            try (InputStream input = jarFile.getInputStream(jarEntry)) {
                 String content = new String(input.readAllBytes());
                 content = content
                     .replace("enable effect commands: false", "enable effect commands: true")
                     .replace("allow ops to use effect commands: false", "allow ops to use effect commands: true");
-                output.write(content.getBytes());
+                Files.write(configFile.getAbsoluteFile().toPath(), content.getBytes());
             }
             reader.printAbove(SUCCESS + "Skript configured!" + RESET);
         }
