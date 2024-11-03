@@ -59,7 +59,8 @@ public record ServerInfo(File folder, PaperAPI.Version version, Addon skript, Se
                 String content = new String(input.readAllBytes());
                 content = content
                     .replace("enable effect commands: false", "enable effect commands: true")
-                    .replace("allow ops to use effect commands: false", "allow ops to use effect commands: true");
+                    .replace("allow ops to use effect commands: false", "allow ops to use effect commands: true")
+                    .replace("pattern: .*", "pattern: (?!-).*");
                 Files.write(configFile.getAbsoluteFile().toPath(), content.getBytes());
             }
             reader.printAbove(SUCCESS + "Skript configured!" + RESET);
@@ -96,7 +97,7 @@ public record ServerInfo(File folder, PaperAPI.Version version, Addon skript, Se
             output.write("eula=true".getBytes());
         }
     }
-    
+
     private void createRunScript(File directory) throws IOException {
         File run = new File(directory, "run.bat");
         try (FileOutputStream output = new FileOutputStream(run)) {
