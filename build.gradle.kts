@@ -18,6 +18,8 @@ dependencies {
 }
 
 tasks.withType<Jar> {
+    archiveFileName.set("server-wizard.jar")
+    destinationDirectory.set(file("D:\\Minecraft\\Servers"))
     manifest {
         attributes["Main-Class"] = "me.tud.Main"
     }

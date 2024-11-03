@@ -5,17 +5,11 @@ import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
-import java.io.*;
+import java.io.Console;
+import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 
 public class Main {
 
@@ -45,14 +39,51 @@ public class Main {
         LineReader reader = LineReaderBuilder.builder().terminal(terminal).build();
 
         ServerInfo serverInfo = startWizard(terminal, reader);
-        if (serverInfo != null)
-            serverInfo.setup(reader);
+        try {
+            if (serverInfo != null)
+                serverInfo.setup(reader);
+        } catch (IOException | InterruptedException e) {
+            handleException(e, terminal, reader, serverInfo);
+        }
 
         reader.printAbove("");
         terminal.writer().print("Press any key to exit...");
         //noinspection ResultOfMethodCallIgnored
         terminal.reader().read();
         terminal.close();
+    }
+
+    public static void handleException(Exception exception, Terminal terminal, LineReader reader, ServerInfo serverInfo) {
+        reader.printAbove(ERROR);
+        reader.printAbove("Failed to setup server");
+        exception.printStackTrace(terminal.writer());
+        if (serverInfo == null)
+            return;
+
+        if (!serverInfo.folder().exists())
+            return;
+
+        reader.printAbove("");
+        String cleanup;
+        do {
+            cleanup = reader.readLine("Cleanup server folder? (y/n): ");
+        } while (!cleanup.equals("y") && !cleanup.equals("n"));
+        if (cleanup.equals("n"))
+            return;
+        reader.printAbove(INFO + "Cleaning up server folder..." + RESET);
+        if (deleteFolder(serverInfo.folder())) reader.printAbove(SUCCESS + "Server folder cleaned up!" + RESET);
+        else reader.printAbove(ERROR + "Failed to clean up server folder" + RESET);
+    }
+
+    private static boolean deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if (files == null)
+            return folder.delete();
+        for (File file : files) {
+            if (!deleteFolder(file))
+                return false;
+        }
+        return folder.delete();
     }
 
     private static ServerInfo startWizard(Terminal terminal, LineReader reader) throws IOException, InterruptedException, URISyntaxException {
@@ -115,9 +146,12 @@ public class Main {
             .map(addon -> addon.name() + " " + addon.version())
             .toList() + RESET);
         reader.printAbove("");
-        String confirmation = reader.readLine("Create Server? (y/n): ");
+        String confirmation;
+        do {
+            confirmation = reader.readLine("Confirm server setup? (y/n): ").toLowerCase(Locale.ENGLISH);
+        } while (!confirmation.equals("y") && !confirmation.equals("n"));
         reader.printAbove("");
-        if (!confirmation.equalsIgnoreCase("y")) {
+        if (confirmation.equals("n")) {
             reader.printAbove(ERROR + "Server setup cancelled" + RESET);
             return null;
         }

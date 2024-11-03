@@ -8,31 +8,33 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import static me.tud.Main.*;
 
-public record ServerInfo(String name, PaperAPI.Version version, Addon skript, Set<Addon> addons) {
+public record ServerInfo(File folder, PaperAPI.Version version, Addon skript, Set<Addon> addons) {
+
+    public ServerInfo(String name, PaperAPI.Version version, Addon skript, Set<Addon> addons) {
+        this(new File(name), version, skript, addons);
+    }
 
     public void setup(LineReader reader) throws IOException, InterruptedException {
         reader.printAbove(INFO + "Setting up server..." + RESET);
         reader.printAbove(INFO + "Creating server folder..." + RESET);
-        File serverFolder = new File(name);
-        if (!serverFolder.mkdir())
+        if (!folder.mkdir())
             throw new IOException("Failed to create server folder");
         reader.printAbove(SUCCESS + "Server folder created!" + RESET);
 
         reader.printAbove(INFO + "Creating plugins folder..." + RESET);
-        File pluginsFolder = new File(name, "plugins");
+        File pluginsFolder = new File(folder, "plugins");
         if (!pluginsFolder.mkdir())
             throw new IOException("Failed to create plugins folder");
         reader.printAbove(SUCCESS + "Plugins folder created!" + RESET);
 
         reader.printAbove(INFO + "Downloading server..." + RESET);
-        downloadPaper(serverFolder);
+        downloadPaper(folder);
         reader.printAbove(SUCCESS + "Server downloaded!" + RESET);
 
         reader.printAbove(INFO + "Downloading " + skript.nameAndVersion() + "..." + RESET);
@@ -74,11 +76,11 @@ public record ServerInfo(String name, PaperAPI.Version version, Addon skript, Se
         }
 
         reader.printAbove(INFO + "Creating eula..." + RESET);
-        createEula(serverFolder);
+        createEula(folder);
         reader.printAbove(SUCCESS + "Eula created!" + RESET);
 
         reader.printAbove(INFO + "Creating run script..." + RESET);
-        createRunScript(serverFolder);
+        createRunScript(folder);
         reader.printAbove(SUCCESS + "Run script created!" + RESET);
 
         reader.printAbove(SUCCESS + "Server setup complete!" + RESET);
