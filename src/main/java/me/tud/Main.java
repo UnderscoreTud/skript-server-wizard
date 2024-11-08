@@ -87,6 +87,11 @@ public class Main {
     }
 
     private static ServerInfo startWizard(Terminal terminal, LineReader reader) throws IOException, InterruptedException, URISyntaxException {
+        printWarningBlock(reader, new String[]{
+            "By using this wizard, you implicitly agree to the Minecraft EULA",
+            "If you don't agree to the EULA, do not use this wizard",
+            "https://account.mojang.com/documents/minecraft_eula"
+        });
         reader.printAbove(BOLD + "Skript Server Setup Wizard" + RESET);
         reader.printAbove("");
 
@@ -156,6 +161,22 @@ public class Main {
             return null;
         }
         return new ServerInfo(serverName, paperVersion, skript, new HashSet<>(addons));
+    }
+
+    private static void printWarningBlock(LineReader reader, String[] content) {
+        int length = Arrays.stream(content).mapToInt(String::length).max().orElse(0);
+        int lengthWithBorders = length + 6;
+        int padding = (reader.getTerminal().getWidth() - lengthWithBorders) / 2;
+        String title = " WARNING ";
+        int topBorderPart = (lengthWithBorders - title.length()) / 2;
+        int extra = (lengthWithBorders - title.length()) % 2;
+        reader.printAbove(WARN + " ".repeat(padding) + "#".repeat(topBorderPart) + title + "#".repeat(topBorderPart + extra));
+        for (String warning : content) {
+            int diff = length - warning.length();
+            int offset = diff / 2;
+            reader.printAbove(" ".repeat(padding) + "#! " + " ".repeat(offset + (diff % 2)) + warning + " ".repeat(offset) + " !#");
+        }
+        reader.printAbove(" ".repeat(padding) + "#".repeat(lengthWithBorders) + RESET);
     }
 
     private static PaperAPI.Version pickPaperVersion(LineReader reader, boolean showHint) throws IOException, InterruptedException {
