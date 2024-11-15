@@ -92,6 +92,7 @@ public class Main {
             "If you don't agree to the EULA, do not use this wizard",
             "https://account.mojang.com/documents/minecraft_eula"
         });
+        reader.printAbove("");
         reader.printAbove(BOLD + "Skript Server Setup Wizard" + RESET);
         reader.printAbove("");
 
