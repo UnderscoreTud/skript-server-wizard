@@ -13,7 +13,7 @@ import java.util.List;
 
 public final class PaperAPI {
     
-    public static final String PAPER_ENDPOINT = "https://papermc.io/api/v2/projects/paper";
+    public static final String PAPER_ENDPOINT = "https://api.papermc.io/v2/projects/paper";
     public static final String PAPER_VERSION_ENDPOINT = PAPER_ENDPOINT + "/versions/%s";
     public static final String PAPER_BUILD_ENDPOINT = PAPER_VERSION_ENDPOINT + "/builds/%s";
     public static final String PAPER_DOWNLOAD_ENDPOINT = PAPER_BUILD_ENDPOINT + "/downloads/%s";
